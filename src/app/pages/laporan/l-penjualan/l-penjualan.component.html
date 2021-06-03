@@ -1,0 +1,119 @@
+<div class="container-fluid" *ngIf="!showForm">
+  <div class="row">
+    <div class="col-md-12">
+      <div
+        class="page-title-box d-flex align-items-center justify-content-between"
+      >
+        <h4 class="mb-0 font-size-18">{{ pageTitle }}</h4>
+      </div>
+    </div>
+    <div class="col-md-12">
+      <div class="card">
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md-12">
+              <div class="form-group row">
+                <div class="col-md-3">
+                  <input
+                    type="text"
+                    class="form-control form-control-sm"
+                    name="periode"
+                    daterangepicker
+                    [options]="options"
+                    (selected)="selectedDate($event, daterange)"
+                    placeholder="Periode"
+                  />
+                </div>
+                <div class="col-md-3">
+                  <button class="btn btn-primary btn-sm" (click)="tampil(0, 0)">
+                    Tampilkan
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-12" *ngIf="listPenjualan">
+      <div class="page-title-box d-flex align-items-center justify-content-end">
+        <div class="row">
+          <div class="col-md-6">
+            <button class="btn btn-success btn-sm" (click)="tampil(1, 0)">
+              excel
+            </button>
+          </div>
+          <div class="col-md-6">
+            <button class="btn btn-primary btn-sm" (click)="tampil(0, 1)">
+              print
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-12" *ngIf="listPenjualan">
+      <div class="card">
+        <div class="card-body">
+          <div class="table-responsive">
+            <table
+              class="table table-hover mobile-optimised mb-0"
+              data-page-length="20"
+            >
+              <thead class="thead-light">
+                <tr class="text-center">
+                  <th>No</th>
+                  <th>Tanggal</th>
+                  <th>Invoice</th>
+                  <th>Konsumen</th>
+                  <th>Supplier</th>
+                  <th>Kode Barang</th>
+                  <th>Barang</th>
+                  <th>Tipe</th>
+                  <th>Satuan</th>
+                  <th>Jumlah</th>
+                  <th>Harga</th>
+                  <th>Total</th>
+                </tr>
+              </thead>
+              <tbody
+                *ngFor="let val of listPenjualan; index as i"
+                class="text-center"
+              >
+                <tr class="text-center">
+                  <td data-th="No" [attr.rowspan]="val.rows + 1">
+                    {{ i + 1 }}
+                  </td>
+                  <td data-th="tanggal" [attr.rowspan]="val.rows + 1">
+                    {{ val.tanggal }}
+                  </td>
+                </tr>
+                <tr *ngFor="let b of val.details">
+                  <td data-th="invoice">{{ b.no_invoice }}</td>
+                  <td data-th="konsumen">{{ b.konsumen }}</td>
+                  <td data-th="supplier">{{ b.supplier }}</td>
+                  <td data-th="kode">{{ b.kode }}</td>
+                  <td data-th="barang">{{ b.nama }}</td>
+                  <td data-th="tipe">{{ b.tipe }}</td>
+                  <td data-th="satuan">{{ b.satuan }}</td>
+                  <td data-th="jumlah">{{ b.jumlah }}</td>
+                  <td data-th="harga">
+                    Rp.{{ b.harga_beli | number: "1.2-2" }}
+                  </td>
+                  <td data-th="total">{{ b.total | number: "1.2-2" }}</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <td colspan="11" class="text-right">Total</td>
+                  <td class="text-center">
+                    {{ model.total | number: "1.2-2" }}
+                  </td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

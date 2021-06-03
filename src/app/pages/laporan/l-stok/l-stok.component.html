@@ -1,0 +1,101 @@
+<div class="container-fluid" *ngIf="!showForm">
+  <div class="row">
+    <div class="col-md-12">
+      <div
+        class="page-title-box d-flex align-items-center justify-content-between"
+      >
+        <h4 class="mb-0 font-size-18">{{ pageTitle }}</h4>
+      </div>
+    </div>
+    <div class="col-md-12">
+      <div class="card">
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md-12">
+              <div class="form-group row">
+                <div class="col-md-3">
+                  <input
+                    type="text"
+                    class="form-control form-control-sm"
+                    name="periode"
+                    daterangepicker
+                    [options]="options"
+                    (selected)="selectedDate($event, daterange)"
+                    placeholder="Periode"
+                  />
+                </div>
+                <div class="col-md-3">
+                  <button class="btn btn-primary btn-sm" (click)="tampil(0, 0)">
+                    Tampilkan
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-12" *ngIf="listStok">
+      <div class="page-title-box d-flex align-items-center justify-content-end">
+        <div class="row">
+          <div class="col-md-6">
+            <button class="btn btn-success btn-sm" (click)="tampil(1, 0)">
+              excel
+            </button>
+          </div>
+          <div class="col-md-6">
+            <button class="btn btn-primary btn-sm" (click)="tampil(0, 1)">
+              print
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-12" *ngIf="listStok">
+      <div class="card">
+        <div class="card-body">
+          <div class="table-responsive">
+            <table
+              class="table table-hover mobile-optimised mb-0"
+              data-page-length="20"
+            >
+              <thead class="thead-light">
+                <tr class="text-center">
+                  <th>No</th>
+                  <th>Tanggal</th>
+                  <th>Kode Barang</th>
+                  <th>Barang</th>
+                  <th>Stok Awal</th>
+                  <th>Penambahan</th>
+                  <th>Pengurangan</th>
+                  <th>Real Stok</th>
+                </tr>
+              </thead>
+              <tbody
+                *ngFor="let val of listStok; index as i"
+                class="text-center"
+              >
+                <tr class="text-center">
+                  <td data-th="No" [attr.rowspan]="val.rows + 1">
+                    {{ i + 1 }}
+                  </td>
+                  <td data-th="tanggal" [attr.rowspan]="val.rows + 1">
+                    {{ val.tanggal }}
+                  </td>
+                </tr>
+                <tr *ngFor="let b of val.details">
+                  <td data-th="kode">{{ b.kode }}</td>
+                  <td data-th="barang">{{ b.barang }}</td>
+                  <td data-th="tipe">{{ b.stok_awal }}</td>
+                  <td data-th="penjumlahan">{{ b.penambahan }}</td>
+                  <td data-th="pengurangan">{{ b.pengurangan }}</td>
+                  <td data-th="real_stok">{{ b.real_stok }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

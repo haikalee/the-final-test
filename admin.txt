@@ -1,0 +1,2 @@
+akses: {"barang":true,"pengguna":true,"satuan":true,"konsumen":true,"tipe_barang":true,"supplier":true,"pembelian":false,"t_pembelian":true,"t_penjualan":true,"l_pembelian":true,"l_penjualan":true}
+password: f865b53623b121fd34ee5426c792e5c33af8c227
