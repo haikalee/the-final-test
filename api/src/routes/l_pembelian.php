@@ -79,13 +79,13 @@ $app->get('/l_pembelian/index', function ($request, $response) {
 
   if (isset($params['is_export']) && 1 == $params['is_export']) {
     $view = twigView();
-    $content = $view->fetch('laporan/pembelian.html', $arr);
+    $content = $view->fetch('laporan/pembelian/excel.html', $arr);
     echo $content;
     header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
     header('Content-Disposition: attachment;Filename="List Pembelian.xls"');
   } elseif (isset($params['is_print']) && 1 == $params['is_print']) {
     $view = twigView();
-    $content = $view->fetch('laporan/pembelian.html', $arr);
+    $content = $view->fetch('laporan/pembelian/pembelian.html', $arr);
     echo $content;
     echo '<script type="text/javascript">window.print();setTimeout(function () { window.close(); }, 500);</script>';
   } else {

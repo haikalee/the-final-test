@@ -30,13 +30,14 @@ import { LaporanRoutingModule } from './laporan-routing.module';
 import { LPembelianComponent } from './l-pembelian/l-pembelian.component';
 import { LPenjualanComponent } from './l-penjualan/l-penjualan.component';
 import { LStokComponent } from './l-stok/l-stok.component';
+import { LKartuStokComponent } from './l-kartu-stok/l-kartu-stok.component';
 
 export const options: Partial<IConfig> = {
   thousandSeparator: ".",
 };
 
 @NgModule({
-  declarations: [LPembelianComponent, LPenjualanComponent, LStokComponent],
+  declarations: [LPembelianComponent, LPenjualanComponent, LStokComponent, LKartuStokComponent],
   imports: [
     CommonModule,
     FormsModule,

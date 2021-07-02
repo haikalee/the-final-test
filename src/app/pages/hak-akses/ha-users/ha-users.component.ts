@@ -32,6 +32,8 @@ export class HaUsersComponent implements OnInit {
   listSupplier: any;
   listStatus: any;
   listRules: any;
+  isTrash: boolean;
+  status: any;
 
   modelCheck: {
     DataMaster;
@@ -42,6 +44,7 @@ export class HaUsersComponent implements OnInit {
     nama;
     password;
     username;
+    is_trash;
     foto: { base64 };
     m_rules_id;
   };
@@ -65,6 +68,16 @@ export class HaUsersComponent implements OnInit {
     };
     this.getData();
     this.empty();
+    this.status = [
+      {
+        id: 1,
+        status: 'trash'
+      },
+      {
+        id: 2,
+        status: 'index'
+      },
+    ]
   }
 
   myForm = new FormGroup({
@@ -84,22 +97,37 @@ export class HaUsersComponent implements OnInit {
       ordering: false,
       pagingType: "full_numbers",
       ajax: (dataTablesParameters: any, callback) => {
-        const params = {
-          filter: JSON.stringify(this.modelParam),
-          offset: dataTablesParameters.start,
-          limit: dataTablesParameters.length,
-        };
-        this.landaService
-          .DataGet("/m_pengguna/index", params)
-          .subscribe((res: any) => {
+        if (this.model.is_trash == 1) {
+          const params = {
+            filter: JSON.stringify(this.modelParam),
+            offset: dataTablesParameters.start,
+            limit: dataTablesParameters.length,
+          };
+          this.landaService.DataGet('/m_pengguna/trash', {}).subscribe((res: any) => {
             this.listData = res.data.list;
-
             callback({
               recordsTotal: res.data.totalItems,
               recordsFiltered: res.data.totalItems,
               data: [],
             });
           });
+        } else {
+          const params = {
+            filter: JSON.stringify(this.modelParam),
+            offset: dataTablesParameters.start,
+            limit: dataTablesParameters.length,
+          };
+          this.landaService
+            .DataGet("/m_pengguna/index", params)
+            .subscribe((res: any) => {
+              this.listData = res.data.list;
+              callback({
+                recordsTotal: res.data.totalItems,
+                recordsFiltered: res.data.totalItems,
+                data: [],
+              });
+            });
+        }
       },
     };
   }
@@ -114,6 +142,7 @@ export class HaUsersComponent implements OnInit {
       nama: "",
       password: "",
       username: "",
+      is_trash: 0,
       foto: {
         base64: ''
       },
@@ -236,5 +265,48 @@ export class HaUsersComponent implements OnInit {
         });
       };
     }
+  }
+
+  restore(val) {
+    this.landaService.DataPost('/m_pengguna/restore', { id: val.id }).subscribe((res: any) => {
+      if (res.status_code === 200) {
+        this.landaService.alertSuccess("Berhasil", "Data telah dikembalikan");
+        this.reloadDataTable();
+      } else {
+        this.landaService.alertError("Mohon maaf", res.errors);
+      }
+    });
+  }
+
+  changeIsTrash() {
+    this.reloadDataTable();
+  }
+
+  hapusPermanen(val) {
+    Swal.fire({
+      title: "Apakah anda yakin ?",
+      text: "Menghapus data akan berpengaruh terhadap data lainnya",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#34c38f",
+      cancelButtonColor: "#f46a6a",
+      confirmButtonText: "Ya, Hapus data ini !",
+    }).then((result) => {
+      if (result.value) {
+        this.landaService
+          .DataPost("/m_pengguna/delete_permanen", { id: val.id })
+          .subscribe((res: any) => {
+            if (res.status_code === 200) {
+              this.landaService.alertSuccess(
+                "Berhasil",
+                "Data telah dihapus !"
+              );
+              this.reloadDataTable();
+            } else {
+              this.landaService.alertError("Mohon Maaf", res.errors);
+            }
+          });
+      }
+    });
   }
 }

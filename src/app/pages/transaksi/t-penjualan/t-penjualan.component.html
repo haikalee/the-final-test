@@ -254,6 +254,8 @@
                           type="number"
                           name="jumlah_{{ i }}"
                           [(ngModel)]="val.jumlah"
+                          [min]="0"
+                          [max]="maxLength[i]"
                           placeholder="Jumlah"
                           (change)="total()"
                         />
@@ -273,7 +275,9 @@
                       <td data-th="No">
                         <input
                           class="form-control form-control-sm"
-                          type="number"
+                          type="text"
+                          mask="separator.2"
+                          thousandSeparator="."
                           name="harga_jual{{ i }}"
                           [(ngModel)]="val.harga_jual"
                           placeholder="Harga Jual"
@@ -283,7 +287,9 @@
                       <td data-th="No">
                         <input
                           class="form-control form-control-sm"
-                          type="number"
+                          type="text"
+                          mask="separator.2"
+                          thousandSeparator="."
                           name="harga_beli{{ i }}"
                           [(ngModel)]="val.harga_beli"
                           placeholder="Harga Beli"
@@ -293,7 +299,9 @@
                       <td data-th="No">
                         <input
                           disabled
-                          type="number"
+                          type="text"
+                          mask="separator.2"
+                          thousandSeparator="."
                           class="form-control form-control-sm"
                           name="total{{ i }}"
                           [(ngModel)]="val.total"
@@ -322,7 +330,9 @@
                         <input
                           disabled
                           class="form-control form-control-sm"
-                          type="number"
+                          type="text"
+                          mask="separator.2"
+                          thousandSeparator="."
                           name="total"
                           [(ngModel)]="model.total"
                           placeholder="0"

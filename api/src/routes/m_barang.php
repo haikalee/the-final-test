@@ -10,7 +10,6 @@ function Validasi($data, $custom = array())
     'm_supplier_id' => 'required',
     'm_tipe_barang_id' => 'required',
     'm_satuan_id' => 'required',
-    'jumlah' => 'required',
     'harga_beli' => 'required',
     'harga_jual' => 'required',
   );
@@ -79,6 +78,10 @@ $app->post('/m_barang/save', function ($request, $response) {
         $model = $db->update('m_barang', $data, ['id' => $data['id']]);
       } else {
         $model = $db->insert('m_barang', $data);
+        $db->insert('l_stok', [
+          'm_barang_id' => $model->id,
+          'total' => 0
+        ]);
       }
       return successResponse($response, $data);
     } catch (Exception $e) {
@@ -102,8 +105,9 @@ $app->post('/m_barang/delete', function ($request, $response) {
 $app->get('/m_barang/listbarang', function ($request, $response) {
   $params = $request->getParams();
   $db = Db::db();
-  $data = $db->select('m_barang.*, m_supplier.nama as supplier, m_tipe_barang.nama as tipe_barang, m_satuan.nama as satuan')
-    ->from('m_barang')
+  $data = $db->select('l_stok.*, m_barang.*, m_supplier.nama as supplier, m_tipe_barang.nama as tipe_barang, m_satuan.nama as satuan')
+    ->from('l_stok')
+    ->leftJoin('m_barang', 'l_stok.m_barang_id = m_barang.id')
     ->leftJoin('m_supplier', 'm_barang.m_supplier_id = m_supplier.id')
     ->leftJoin('m_tipe_barang', 'm_barang.m_tipe_barang_id = m_tipe_barang.id')
     ->leftJoin('m_satuan', 'm_barang.m_satuan_id = m_satuan.id')
@@ -125,4 +129,50 @@ $app->get('/m_barang/getbarang', function ($request, $response) {
     ->orderBy('m_barang.id DESC');
 
   return successResponse($response, $data->find());
+});
+
+
+$app->get('/m_barang/trash', function ($request, $response) {
+  $params = $request->getParams();
+  $db = Db::db();
+  $data = $db->select('*')->from('m_barang')->where('is_deleted', '=', 1);
+
+  if (isset($params['limit']) && !empty($params['llimit'])) {
+    $data->limit($params['limit']);
+  }
+
+  if (isset($params['offset']) && !empty($params['offset'])) {
+    $data->offset($params['offset']);
+  }
+
+  $models     = $data->findAll();
+  $totalItems = $data->count();
+
+  return successResponse($response, [
+    'list' => $models,
+    'totalItems' => $totalItems
+  ]);
+  return unprocessResponse($response, ['terjadi masalah pada server']);
+});
+
+$app->post('/m_barang/restore', function ($request, $response) {
+  $params = $request->getParams();
+  $db = Db::db();
+  $model = $db->update('m_barang', ['is_deleted' => 0], ['id' => $params['id']]);
+
+  if (isset($model)) {
+    return successResponse($response, [$model]);
+  }
+  return unprocessResponse($response, ['terjadi masalah pada server']);
+});
+
+$app->post('/m_barang/delete_permanen', function ($request, $response) {
+  $params  = $request->getParams();
+  $db    = Db::db();
+  $model = $db->delete('m_barang', ['id' => $params['id']]);
+
+  if (isset($model)) {
+    return successResponse($response, [$model]);
+  }
+  return unprocessResponse($response, ['terjadi masalah pada server']);
 });

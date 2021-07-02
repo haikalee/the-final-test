@@ -33,6 +33,19 @@
                     (keyup)="reloadDataTable()"
                   />
                 </div>
+                <div class="col-md-3 mb-3">
+                  <ng-select
+                    [(ngModel)]="model.is_trash"
+                    [items]="status"
+                    bindLabel="status"
+                    bindValue="id"
+                    [disabled]="isView"
+                    name="is_trash"
+                    placeholder="pilih status"
+                    appendTo="body"
+                    (change)="changeIsTrash()"
+                  ></ng-select>
+                </div>
               </div>
             </div>
           </div>
@@ -64,7 +77,7 @@
 
                   <td class="row-action">
                     <ul class="list-inline mb-0">
-                      <li class="list-inline-item">
+                      <li class="list-inline-item" *ngIf="model.is_trash != 1">
                         <a
                           href="javascript: void(0);"
                           (click)="edit(val)"
@@ -75,7 +88,7 @@
                           <i class="fa fa-edit font-size-14 align-middle"></i>
                         </a>
                       </li>
-                      <li class="list-inline-item">
+                      <li class="list-inline-item" *ngIf="model.is_trash != 1">
                         <a
                           href="javascript: void(0);"
                           (click)="delete(val)"
@@ -84,6 +97,35 @@
                           ngbTooltip="Hapus"
                         >
                           <i class="fa fa-trash font-size-14 align-middle"></i>
+                        </a>
+                      </li>
+                      <li class="list-inline-item" *ngIf="model.is_trash == 1">
+                        <a
+                          href="javascript: void(0);"
+                          (click)="restore(val)"
+                          class="mb-danger"
+                          placement="left"
+                          ngbTooltip="restore"
+                        >
+                          <i
+                            class="
+                              fas
+                              fa-trash-restore
+                              font-size-14
+                              align-middle
+                            "
+                          ></i>
+                        </a>
+                      </li>
+                      <li class="list-inline-item" *ngIf="model.is_trash == 1">
+                        <a
+                          href="javascript: void(0);"
+                          (click)="hapusPermanen(val)"
+                          class="mb-danger"
+                          placement="left"
+                          ngbTooltip="hapus"
+                        >
+                          <i class="fas fa-trash font-size-14 align-middle"></i>
                         </a>
                       </li>
                     </ul>

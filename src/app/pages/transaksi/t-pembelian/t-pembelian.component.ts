@@ -31,6 +31,7 @@ export class TPembelianComponent implements OnInit {
   listSupplier: any;
   listBeli: any;
   detailPembelian: any;
+  maxLength: any;
   modelParam: { waktu: { periode_awal, periode_akhir } };
   model: {
     no_invoice,
@@ -74,6 +75,7 @@ export class TPembelianComponent implements OnInit {
     };
     this.listPembelian = [];
     this.listBeli = [];
+    this.maxLength = [];
     this.getData();
     this.empty();
   }
@@ -126,7 +128,6 @@ export class TPembelianComponent implements OnInit {
           this.index();
         } else {
           this.landaService.alertError("Mohon Maaf", res.errors);
-          this.index();
         }
       });
   }
@@ -313,6 +314,7 @@ export class TPembelianComponent implements OnInit {
   close() {
     this.modalService.dismissAll();
   }
+
   onFileChange(event) {
     const reader = new FileReader();
     if (event.target.files && event.target.files.length) {

@@ -96,3 +96,48 @@ $app->post('/m_rules/delete', function ($request, $response) {
   }
   return unprocessResponse($response, ['Terjadi masalah pada server']);
 });
+
+$app->get('/m_rules/trash', function ($request, $response) {
+  $params = $request->getParams();
+  $db = Db::db();
+  $data = $db->select('*')->from('m_rules')->where('is_deleted', '=', 1);
+
+  if (isset($params['limit']) && !empty($params['llimit'])) {
+    $data->limit($params['limit']);
+  }
+
+  if (isset($params['offset']) && !empty($params['offset'])) {
+    $data->offset($params['offset']);
+  }
+
+  $models     = $data->findAll();
+  $totalItems = $data->count();
+
+  return successResponse($response, [
+    'list' => $models,
+    'totalItems' => $totalItems
+  ]);
+  return unprocessResponse($response, ['terjadi masalah pada server']);
+});
+
+$app->post('/m_rules/restore', function ($request, $response) {
+  $params = $request->getParams();
+  $db = Db::db();
+  $model = $db->update('m_rules', ['is_deleted' => 0], ['id' => $params['id']]);
+
+  if (isset($model)) {
+    return successResponse($response, [$model]);
+  }
+  return unprocessResponse($response, ['terjadi masalah pada server']);
+});
+
+$app->post('/m_rules/delete_permanen', function ($request, $response) {
+  $params  = $request->getParams();
+  $db    = Db::db();
+  $model = $db->delete('m_rules', ['id' => $params['id']]);
+
+  if (isset($model)) {
+    return successResponse($response, [$model]);
+  }
+  return unprocessResponse($response, ['terjadi masalah pada server']);
+});

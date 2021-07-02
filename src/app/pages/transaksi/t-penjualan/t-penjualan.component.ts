@@ -24,6 +24,7 @@ export class TPenjualanComponent implements OnInit {
   showAllData: boolean;
   isMember: boolean;
   daterange: any = {};
+  maxLength: any = [];
   listPenjualan: any;
   listCustomer: any;
   listSatuan: any;
@@ -124,7 +125,6 @@ export class TPenjualanComponent implements OnInit {
           this.index();
         } else {
           this.landaService.alertError("Mohon Maaf", res.errors);
-          this.index();
         }
       });
   }
@@ -209,6 +209,7 @@ export class TPenjualanComponent implements OnInit {
     this.listPenjualan = [];
     this.listBarang = [];
     this.isMember = false;
+    this.maxLength = [];
   }
 
   addRow(listPenjualan) {
@@ -245,6 +246,7 @@ export class TPenjualanComponent implements OnInit {
 
   selectBarang(val, id) {
     this.landaService.DataGet('/m_barang/getbarang', { id }).subscribe((res: any) => {
+      this.maxLength.push(res.data.jumlah);
       val.m_satuan_id = res.data.m_satuan_id;
       val.harga_jual = res.data.harga_jual;
       val.harga_beli = res.data.harga_beli;

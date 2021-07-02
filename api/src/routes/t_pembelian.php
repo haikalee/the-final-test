@@ -20,7 +20,7 @@ $app->get('/t_pembelian/index', function ($request, $response) {
   $data = $db->select('*')
     ->from('t_pembelian')
     ->where('t_pembelian.is_deleted', '=', 0)
-    ->orderBy('t_pembelian.no_invoice DESC');
+    ->orderBy('t_pembelian.id DESC');
 
   if (isset($params['filter'])) {
     $filter = (array) json_decode($params['filter']);
@@ -72,37 +72,43 @@ $app->post('/t_pembelian/save', function ($request, $response) {
           return unprocessResponse($response, [$uploadFile['error']]);
         }
       }
+
       if (isset($params['model'])) {
         $params['model']['tanggal'] = $landa->arrayToDate($params['model']['tanggal']);
         $params['model']['tanggal'] = strtotime(date('Y-m-d', strtotime($params['model']['tanggal'])));
         $model = $db->insert('t_pembelian', $params['model']);
       }
 
-
       foreach ($params['pembelian'] as $p) {
         $history = [];
         $laporanStok = [];
         $barang = (array) $db->select('*')->from('m_barang')->where('m_barang.id', '=', $p['m_barang_id'])->find();
-        $stok = (array) $db->select('*')->from('l_stok')->where('l_stok.m_barang_id', '=', $p['m_barang_id'])->find();
-        $laporanStok['stok_awal'] = $barang['jumlah'];
-        $history['jumlah_awal'] = $barang['jumlah'];
-        $laporanStok['penambahan'] = $p['jumlah'];
-        $laporanStok['pengurangan'] = 0;
-        $laporanStok['real_stok'] = $barang['jumlah'] + $laporanStok['penambahan'];
-        $barang['jumlah'] += $p['jumlah'];
+        $stokBarang = (array) $db->select('*')->from('l_stok')->where('m_barang_id', '=', $p['m_barang_id'])->find();
         $p['t_pembelian_id'] = $model->id;
-        $db->update('m_barang', $barang, ['id' => $p['m_barang_id']]);
         $laporanStok['kode'] = $barang['kode'];
         $laporanStok['m_barang_id'] = $p['m_barang_id'];
         $laporanStok['tanggal'] = $params['model']['tanggal'];
-        $db->insert('l_stok', $laporanStok);
-        $pembelian = $db->insert('t_pembelian_det', $p);
-        $history['t_pembelian_det_id'] = $pembelian->id;
+        $laporanStok['penambahan'] = $p['jumlah'];
+        $laporanStok['pengurangan'] = 0;
+        $history['t_pembelian_det_id'] = $model->id;
         $history['jumlah_pembelian'] = $p['jumlah'];
+        $pembelian = $db->insert('t_pembelian_det', $p);
+        $laporanStok['t_pembelian_det_id'] = $pembelian->id;
+        if (!isset($stokBarang['id'])) {
+          $laporanStok['total'] = $p['jumlah'];
+          $laporanStok['stok_awal'] = 0;
+          $db->insert('l_stok', $laporanStok);
+        } else {
+          $laporanStok['stok_awal'] = $stokBarang['total'];
+          $laporanStok['total'] = $p['jumlah'] + $stokBarang['total'];
+          $stokBarang['total'] += $p['jumlah'];
+          $db->update('l_stok', $stokBarang, ['id' => $stokBarang['id']]);
+        }
+        $db->insert('l_kartu_stok', $laporanStok);
         $db->insert('t_pembelian_history', $history);
       }
 
-      return successResponse($response, $pembelian);
+      return successResponse($response, $model);
     } catch (Exception $e) {
       return unprocessResponse($response, ['terjadi masalah pada server']);
     }
@@ -116,13 +122,14 @@ $app->post('/t_pembelian/delete', function ($request, $response) {
   $data = $db->select('*')->from('t_pembelian_det')->where('t_pembelian_id', '=', $params['id'])->findAll();
 
   foreach ($data as $d) {
-    $barang = (array) $db->select('*')->from('m_barang')->where('m_barang.id', '=', $d->m_barang_id)->find();
-    $barang['jumlah'] -= $d->jumlah;
-    $db->update('m_barang', $barang, ['id' => $d->m_barang_id]);
+    $stokBarang = (array) $db->select('*')->from('l_stok')->where('m_barang_id', '=', $d->m_barang_id)->find();
+    $stokBarang['total'] -= $d->jumlah;
+    $db->update('l_stok', $stokBarang, ['id' => $stokBarang['id']]);
   }
 
   $model = $db->update('t_pembelian', ['is_deleted' => 1], ['id' => $params['id']]);
-
+  $db->delete('t_penjualan_det', ['t_pembelian_id' => $params['id']]);
+  $db->delete('l_kartu_stok', ['t_pembelian_det_id' => $params['id']]);
   if (isset($model)) {
     return successResponse($response, [$model]);
   }

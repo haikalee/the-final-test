@@ -62,34 +62,17 @@
               <thead class="thead-light">
                 <tr class="text-center">
                   <th>No</th>
-                  <th>Tanggal</th>
-                  <th>Kode Barang</th>
                   <th>Barang</th>
-                  <th>Stok Awal</th>
-                  <th>Penambahan</th>
-                  <th>Pengurangan</th>
-                  <th>Real Stok</th>
+                  <th>Kode Barang</th>
+                  <th>Stok</th>
                 </tr>
               </thead>
-              <tbody
-                *ngFor="let val of listStok; index as i"
-                class="text-center"
-              >
-                <tr class="text-center">
-                  <td data-th="No" [attr.rowspan]="val.rows + 1">
-                    {{ i + 1 }}
-                  </td>
-                  <td data-th="tanggal" [attr.rowspan]="val.rows + 1">
-                    {{ val.tanggal }}
-                  </td>
-                </tr>
-                <tr *ngFor="let b of val.details">
-                  <td data-th="kode">{{ b.kode }}</td>
-                  <td data-th="barang">{{ b.barang }}</td>
-                  <td data-th="tipe">{{ b.stok_awal }}</td>
-                  <td data-th="penjumlahan">{{ b.penambahan }}</td>
-                  <td data-th="pengurangan">{{ b.pengurangan }}</td>
-                  <td data-th="real_stok">{{ b.real_stok }}</td>
+              <tbody class="text-center">
+                <tr *ngFor="let val of listStok; index as i">
+                  <td data-th="No">{{ i + 1 }}</td>
+                  <td data-th="barang">{{ val.nama }}</td>
+                  <td data-th="kode">{{ val.kode }}</td>
+                  <td data-th="tipe">{{ val.total }}</td>
                 </tr>
               </tbody>
             </table>

@@ -81,13 +81,13 @@ $app->get('/l_penjualan/index', function ($request, $response) {
 
   if (isset($params['is_export']) && 1 == $params['is_export']) {
     $view = twigView();
-    $content = $view->fetch('laporan/penjualan.html', $arr);
+    $content = $view->fetch('laporan/penjualan/excel.html', $arr);
     echo $content;
     header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
     header('Content-Disposition: attachment;Filename="List Penjualan.xls"');
   } elseif (isset($params['is_print']) && 1 == $params['is_print']) {
     $view = twigView();
-    $content = $view->fetch('laporan/penjualan.html', $arr);
+    $content = $view->fetch('laporan/penjualan/penjualan.html', $arr);
     echo $content;
     echo '<script type="text/javascript">window.print();setTimeout(function () { window.close(); }, 500);</script>';
   } else {

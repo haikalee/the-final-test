@@ -18,6 +18,8 @@ export class MSatuanComponent implements OnInit {
   isView: boolean;
   isEdit: boolean;
   showForm: boolean;
+  isTrash: boolean;
+  listStatus: any;
   modelParam: { nama };
   model: any = {};
 
@@ -40,6 +42,17 @@ export class MSatuanComponent implements OnInit {
     };
     this.getData();
     this.empty();
+
+    this.listStatus = [
+      {
+        id: 1,
+        status: 'trash'
+      },
+      {
+        id: 2,
+        status: 'index'
+      },
+    ]
   }
 
   reloadDataTable(): void {
@@ -55,14 +68,13 @@ export class MSatuanComponent implements OnInit {
       ordering: false,
       pagingType: "full_numbers",
       ajax: (dataTablesParameters: any, callback) => {
-        const params = {
-          filter: JSON.stringify(this.modelParam),
-          offset: dataTablesParameters.start,
-          limit: dataTablesParameters.length,
-        };
-        this.landaService
-          .DataGet("/m_satuan/index", params)
-          .subscribe((res: any) => {
+        if (this.model.is_trash == 1) {
+          const params = {
+            filter: JSON.stringify(this.modelParam),
+            offset: dataTablesParameters.start,
+            limit: dataTablesParameters.length,
+          };
+          this.landaService.DataGet('/m_satuan/trash', {}).subscribe((res: any) => {
             this.listData = res.data.list;
             callback({
               recordsTotal: res.data.totalItems,
@@ -70,6 +82,23 @@ export class MSatuanComponent implements OnInit {
               data: [],
             });
           });
+        } else {
+          const params = {
+            filter: JSON.stringify(this.modelParam),
+            offset: dataTablesParameters.start,
+            limit: dataTablesParameters.length,
+          };
+          this.landaService
+            .DataGet("/m_satuan/index", params)
+            .subscribe((res: any) => {
+              this.listData = res.data.list;
+              callback({
+                recordsTotal: res.data.totalItems,
+                recordsFiltered: res.data.totalItems,
+                data: [],
+              });
+            });
+        }
       },
     };
   }
@@ -147,6 +176,49 @@ export class MSatuanComponent implements OnInit {
               this.landaService.alertSuccess(
                 "Berhasil",
                 "Data satuan telah dihapus !"
+              );
+              this.reloadDataTable();
+            } else {
+              this.landaService.alertError("Mohon Maaf", res.errors);
+            }
+          });
+      }
+    });
+  }
+
+  restore(val) {
+    this.landaService.DataPost('/m_satuan/restore', { id: val.id }).subscribe((res: any) => {
+      if (res.status_code === 200) {
+        this.landaService.alertSuccess("Berhasil", "Data telah dikembalikan");
+        this.reloadDataTable();
+      } else {
+        this.landaService.alertError("Mohon maaf", res.errors);
+      }
+    });
+  }
+
+  changeIsTrash() {
+    this.reloadDataTable();
+  }
+
+  hapusPermanen(val) {
+    Swal.fire({
+      title: "Apakah anda yakin ?",
+      text: "Menghapus data akan berpengaruh terhadap data lainnya",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#34c38f",
+      cancelButtonColor: "#f46a6a",
+      confirmButtonText: "Ya, Hapus data ini !",
+    }).then((result) => {
+      if (result.value) {
+        this.landaService
+          .DataPost("/m_satuan/delete_permanen", { id: val.id })
+          .subscribe((res: any) => {
+            if (res.status_code === 200) {
+              this.landaService.alertSuccess(
+                "Berhasil",
+                "Data telah dihapus !"
               );
               this.reloadDataTable();
             } else {

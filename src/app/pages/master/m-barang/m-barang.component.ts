@@ -23,6 +23,8 @@ export class MBarangComponent implements OnInit {
   model: any = {};
   listData: any;
   listSupplier: any;
+  isTrash: boolean;
+  listStatus: any;
   listSatuan: any;
   listTipeBarang: any;
   tipeModal: string;
@@ -48,6 +50,17 @@ export class MBarangComponent implements OnInit {
     this.getData();
     this.empty();
     this.getSup();
+    this.isTrash = false;
+    this.listStatus = [
+      {
+        id: 1,
+        status: 'trash'
+      },
+      {
+        id: 2,
+        status: 'index'
+      },
+    ]
   }
 
   reloadDataTable(): void {
@@ -63,14 +76,13 @@ export class MBarangComponent implements OnInit {
       ordering: false,
       pagingType: "full_numbers",
       ajax: (dataTablesParameters: any, callback) => {
-        const params = {
-          filter: JSON.stringify(this.modelParam),
-          offset: dataTablesParameters.start,
-          limit: dataTablesParameters.length,
-        };
-        this.landaService
-          .DataGet("/m_barang/index", params)
-          .subscribe((res: any) => {
+        if (this.model.is_trash == 1) {
+          const params = {
+            filter: JSON.stringify(this.modelParam),
+            offset: dataTablesParameters.start,
+            limit: dataTablesParameters.length,
+          };
+          this.landaService.DataGet('/m_barang/trash', {}).subscribe((res: any) => {
             this.listData = res.data.list;
             callback({
               recordsTotal: res.data.totalItems,
@@ -78,6 +90,23 @@ export class MBarangComponent implements OnInit {
               data: [],
             });
           });
+        } else {
+          const params = {
+            filter: JSON.stringify(this.modelParam),
+            offset: dataTablesParameters.start,
+            limit: dataTablesParameters.length,
+          };
+          this.landaService
+            .DataGet("/m_barang/index", params)
+            .subscribe((res: any) => {
+              this.listData = res.data.list;
+              callback({
+                recordsTotal: res.data.totalItems,
+                recordsFiltered: res.data.totalItems,
+                data: [],
+              });
+            });
+        }
       },
     };
   }
@@ -211,5 +240,32 @@ export class MBarangComponent implements OnInit {
           this.landaService.alertError("Mohon maaf", res.errors);
         }
       });
+  }
+
+  restore(val) {
+    this.landaService.DataPost('/m_barang/restore', { id: val.id }).subscribe((res: any) => {
+      if (res.status_code === 200) {
+        this.landaService.alertSuccess("Berhasil", "Data telah dikembalikan");
+        this.reloadDataTable();
+      } else {
+        this.landaService.alertError("Mohon maaf", res.errors);
+      }
+    });
+  }
+
+  changeIsTrash() {
+    // this.isTrash = !this.isTrash;
+    this.reloadDataTable();
+  }
+
+  hapusPermanen(val) {
+    this.landaService.DataPost('/m_barang/delete_permanen', { id: val.id }).subscribe((res: any) => {
+      if (res.status_code === 200) {
+        this.landaService.alertSuccess("Berhasil", "Data telah dihapus");
+        this.reloadDataTable();
+      } else {
+        this.landaService.alertError("Mohon maaf", res.errors);
+      }
+    });
   }
 }

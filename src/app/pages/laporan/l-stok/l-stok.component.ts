@@ -53,6 +53,7 @@ export class LStokComponent implements OnInit {
     this.data = [];
     this.jumlahPembelian = 0;
     this.empty();
+    this.tampil(0, 0);
   }
 
   index() {
@@ -78,40 +79,30 @@ export class LStokComponent implements OnInit {
   }
 
   tampil(is_export, is_print) {
-    if (this.daterange.start && this.daterange.end) {
-      const data = {
-        periode_mulai: "null",
-        periode_selesai: "null",
-        is_export,
-        is_print,
-      };
-      if (this.daterange.start !== undefined && this.daterange.end !== undefined) {
-        data.periode_mulai = moment(this.daterange.start).format("YYYY-MM-DD");
-        data.periode_selesai = moment(this.daterange.end).format("YYYY-MM-DD");
-      }
-      if (is_export === 1 || is_print === 1) {
-        window.open(
-          this.apiURL + "/l_stok/index?" + $.param(data),
-          "_blank"
-        );
-      } else {
-        this.landaService
-          .DataGet("/l_stok/index", data)
-          .subscribe((res: any) => {
-            if (res.status_code === 200) {
-              this.listStok = res.data.list;
-              this.is_tampilkan = true;
-            } else {
-              this.is_tampilkan = false;
-            }
-          });
-      }
-    } else {
-      this.landaService.alertError(
-        "Mohon Maaf",
-        "Tanggal harus diisi!!"
+    const data = {
+      is_export,
+      is_print,
+    };
+
+    if (is_export === 1 || is_print === 1) {
+      window.open(
+        this.apiURL + "/l_stok/index?" + $.param(data),
+        "_blank"
       );
+      return;
     }
+
+    this.landaService
+      .DataGet("/l_stok/index", data)
+      .subscribe((res: any) => {
+        if (res.status_code === 200) {
+          console.log(res.data);
+          this.listStok = res.data;
+          this.is_tampilkan = true;
+        } else {
+          this.is_tampilkan = false;
+        }
+      });
   }
 
   empty() {

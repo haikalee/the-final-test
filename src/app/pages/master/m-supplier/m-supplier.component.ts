@@ -17,6 +17,8 @@ export class MSupplierComponent implements OnInit {
   pageTitle: string;
   isView: boolean;
   isEdit: boolean;
+  isTrash: boolean;
+  listStatus: any;
   showForm: boolean;
   modelParam: { nama, kode };
   model: any = {};
@@ -41,6 +43,16 @@ export class MSupplierComponent implements OnInit {
     };
     this.getData();
     this.empty();
+    this.listStatus = [
+      {
+        id: 1,
+        status: 'trash'
+      },
+      {
+        id: 2,
+        status: 'index'
+      },
+    ]
   }
 
   reloadDataTable(): void {
@@ -56,14 +68,13 @@ export class MSupplierComponent implements OnInit {
       ordering: false,
       pagingType: "full_numbers",
       ajax: (dataTablesParameters: any, callback) => {
-        const params = {
-          filter: JSON.stringify(this.modelParam),
-          offset: dataTablesParameters.start,
-          limit: dataTablesParameters.length,
-        };
-        this.landaService
-          .DataGet("/m_supplier/index", params)
-          .subscribe((res: any) => {
+        if (this.model.is_trash == 1) {
+          const params = {
+            filter: JSON.stringify(this.modelParam),
+            offset: dataTablesParameters.start,
+            limit: dataTablesParameters.length,
+          };
+          this.landaService.DataGet('/m_supplier/trash', {}).subscribe((res: any) => {
             this.listData = res.data.list;
             callback({
               recordsTotal: res.data.totalItems,
@@ -71,6 +82,23 @@ export class MSupplierComponent implements OnInit {
               data: [],
             });
           });
+        } else {
+          const params = {
+            filter: JSON.stringify(this.modelParam),
+            offset: dataTablesParameters.start,
+            limit: dataTablesParameters.length,
+          };
+          this.landaService
+            .DataGet("/m_supplier/index", params)
+            .subscribe((res: any) => {
+              this.listData = res.data.list;
+              callback({
+                recordsTotal: res.data.totalItems,
+                recordsFiltered: res.data.totalItems,
+                data: [],
+              });
+            });
+        }
       },
     };
   }
@@ -144,6 +172,49 @@ export class MSupplierComponent implements OnInit {
       if (result.value) {
         this.landaService
           .DataPost("/m_supplier/delete", data)
+          .subscribe((res: any) => {
+            if (res.status_code === 200) {
+              this.landaService.alertSuccess(
+                "Berhasil",
+                "Data Supplier telah dihapus !"
+              );
+              this.reloadDataTable();
+            } else {
+              this.landaService.alertError("Mohon Maaf", res.errors);
+            }
+          });
+      }
+    });
+  }
+
+  restore(val) {
+    this.landaService.DataPost('/m_supplier/restore', { id: val.id }).subscribe((res: any) => {
+      if (res.status_code === 200) {
+        this.landaService.alertSuccess("Berhasil", "Data telah dikembalikan");
+        this.reloadDataTable();
+      } else {
+        this.landaService.alertError("Mohon maaf", res.errors);
+      }
+    });
+  }
+
+  changeIsTrash() {
+    this.reloadDataTable();
+  }
+
+  hapusPermanen(val) {
+    Swal.fire({
+      title: "Apakah anda yakin ?",
+      text: "Menghapus data Supplier akan berpengaruh terhadap data lainnya",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#34c38f",
+      cancelButtonColor: "#f46a6a",
+      confirmButtonText: "Ya, Hapus data ini !",
+    }).then((result) => {
+      if (result.value) {
+        this.landaService
+          .DataPost("/m_supplier/delete_permanen", { id: val.id })
           .subscribe((res: any) => {
             if (res.status_code === 200) {
               this.landaService.alertSuccess(
